@@ -12,12 +12,11 @@ import {
 
 export default function InstagramMockup({
   children,
-  onClose,
-  aspectRatio
+  onClose
 }) {
   const [isLiked, setIsLiked] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
-  const [likesCount, setLikesCount] = useState(1428);
+  const [likesCount, setLikesCount] = useState(1842);
 
   const toggleLike = () => {
     setIsLiked(!isLiked);
@@ -25,104 +24,103 @@ export default function InstagramMockup({
   };
 
   return (
-    <div className="mockup-overlay-container">
-      <div className="mockup-modal-window">
-        {/* Mockup Header Toolbar */}
-        <div className="mockup-modal-bar">
-          <div className="mockup-title">
-            <span className="dot-live" />
-            <span>Instagram Feed Post Preview</span>
+    <div className="pro-mockup-backdrop" onClick={onClose}>
+      <div className="pro-mockup-dialog" onClick={(e) => e.stopPropagation()}>
+        {/* Modal Window Header */}
+        <div className="mockup-window-bar">
+          <div className="window-title">
+            <span className="live-indicator" />
+            <span>Instagram Feed Simulation</span>
           </div>
           <button
             type="button"
-            className="mockup-close-btn"
+            className="window-close-btn"
             onClick={onClose}
-            title="Exit Mockup Mode"
           >
-            <X size={18} />
+            <X size={16} />
           </button>
         </div>
 
-        {/* Realistic Instagram Phone / Post Card */}
-        <div className="instagram-card-mockup">
+        {/* Realistic iPhone Instagram Post Frame */}
+        <div className="iphone-instagram-post">
           {/* Post Header */}
-          <div className="ig-post-header">
-            <div className="ig-user-info">
-              {/* Profile Avatar with Story Ring */}
-              <div className="ig-story-ring">
+          <div className="native-post-header">
+            <div className="native-user-block">
+              {/* Instagram Story Gradient Ring */}
+              <div className="native-story-ring">
                 <img
                   src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&auto=format&fit=crop&q=80"
-                  alt="profile"
-                  className="ig-avatar-img"
+                  alt="user avatar"
+                  className="native-avatar"
                 />
               </div>
 
-              <div className="ig-user-names">
-                <div className="ig-username-row">
-                  <span className="ig-username">creator.studio</span>
-                  <div className="ig-verified-pill">
-                    <Check size={9} strokeWidth={4} color="#ffffff" />
+              <div className="native-user-info">
+                <div className="native-username-line">
+                  <span className="native-username">studio.archive</span>
+                  <div className="native-verified">
+                    <Check size={8} strokeWidth={4} color="#ffffff" />
                   </div>
-                  <span className="ig-dot">•</span>
-                  <span className="ig-follow">Follow</span>
+                  <span className="native-dot">•</span>
+                  <span className="native-follow-btn">Follow</span>
                 </div>
-                <div className="ig-audio-row">
+                <div className="native-audio-line">
                   <Music2 size={10} />
-                  <span>JVKE • Golden Hour (Aesthetic Mix)</span>
+                  <span>JVKE • Golden Hour (Original Audio)</span>
                 </div>
               </div>
             </div>
 
-            <button type="button" className="ig-more-btn">
+            <button type="button" className="native-more-btn">
               <MoreHorizontal size={18} />
             </button>
           </div>
 
           {/* Collage Media Container */}
-          <div className="ig-post-media-wrap">
+          <div className="native-media-container">
             {children}
           </div>
 
-          {/* Post Action Icons */}
-          <div className="ig-post-actions">
-            <div className="ig-actions-left">
+          {/* Action Icons */}
+          <div className="native-actions-row">
+            <div className="native-actions-left">
               <button
                 type="button"
-                className={`ig-action-icon ${isLiked ? 'liked' : ''}`}
+                className={`native-action-btn ${isLiked ? 'liked' : ''}`}
                 onClick={toggleLike}
               >
-                <Heart size={24} fill={isLiked ? '#ff3040' : 'none'} color={isLiked ? '#ff3040' : '#ffffff'} />
+                <Heart size={24} fill={isLiked ? '#ff3040' : 'none'} color={isLiked ? '#ff3040' : '#ffffff'} strokeWidth={2} />
               </button>
-              <button type="button" className="ig-action-icon">
-                <MessageCircle size={24} color="#ffffff" />
+              <button type="button" className="native-action-btn">
+                <MessageCircle size={24} color="#ffffff" strokeWidth={2} />
               </button>
-              <button type="button" className="ig-action-icon">
-                <Send size={24} color="#ffffff" />
+              <button type="button" className="native-action-btn">
+                <Send size={24} color="#ffffff" strokeWidth={2} />
               </button>
             </div>
 
             <button
               type="button"
-              className={`ig-action-icon ${isSaved ? 'saved' : ''}`}
+              className={`native-action-btn ${isSaved ? 'saved' : ''}`}
               onClick={() => setIsSaved(!isSaved)}
             >
-              <Bookmark size={24} fill={isSaved ? '#ffffff' : 'none'} color="#ffffff" />
+              <Bookmark size={24} fill={isSaved ? '#ffffff' : 'none'} color="#ffffff" strokeWidth={2} />
             </button>
           </div>
 
           {/* Likes & Caption Text */}
-          <div className="ig-post-details">
-            <div className="ig-likes-text">
+          <div className="native-caption-block">
+            <div className="native-likes-count">
               Liked by <strong>amalfi.vibes</strong> and <strong>{likesCount.toLocaleString()} others</strong>
             </div>
 
-            <div className="ig-caption-text">
-              <strong>creator.studio</strong> Sunday photo dump ✨ made with InstaCollage Pro. Capturing little golden hour moments that never fade 📸☕
-              <span className="ig-hashtags"> #aesthetic #photodump #filmphotography #collage #moodboard</span>
+            <div className="native-caption-body">
+              <strong>studio.archive</strong> Golden hour vignettes from our coastal journey. Built with CollageLab Studio.
+              <span className="native-tags"> #aesthetic #editorial #photodump #collage</span>
             </div>
 
-            <div className="ig-comments-prompt">View all 42 comments</div>
-            <div className="ig-time-stamp">2 HOURS AGO</div>
+            <div className="native-comments-prompt">View all 24 comments</div>
+            <div className="native-timestamp">2 HOURS AGO</div>
           </div>
         </div>
       </div>

@@ -3,9 +3,9 @@ import {
   LayoutGrid,
   Layers,
   Palette,
-  Sparkles,
+  Sliders,
   Type,
-  Sticker,
+  Bookmark,
   Image as ImageIcon,
   Upload,
   Plus,
@@ -34,8 +34,6 @@ export default function Sidebar({
   setBackground,
   customBgColor,
   setCustomBgColor,
-  bgPattern,
-  setBgPattern,
   gap,
   setGap,
   padding,
@@ -69,8 +67,8 @@ export default function Sidebar({
   const [templateCategory, setTemplateCategory] = useState('All');
   const [photoCategory, setPhotoCategory] = useState('All');
 
-  const categories = ['All', '2 Photos', '3 Photos', '4 Photos', '5+ Photos', 'Photobooth'];
-  const photoCategories = ['All', 'Aesthetic & Travel', 'Editorial & Fashion', 'Coffee & Cafe Vibes', 'Cyberpunk & Night', 'Film & Retro'];
+  const categories = ['All', '2 Photos', '3 Photos', '4 Photos', 'Filmstrip', 'Moodboard'];
+  const photoCategories = ['All', 'Travel & Architecture', 'Editorial & Portrait', 'Lifestyle & Coffee', '35mm Film & Vintage'];
 
   const filteredTemplates = templateCategory === 'All'
     ? GRID_TEMPLATES
@@ -83,27 +81,24 @@ export default function Sidebar({
   const selectedItem = freeformItems.find((item) => item.id === selectedItemId);
 
   return (
-    <aside className="studio-sidebar">
-      {/* Primary Tab Navigation */}
-      <div className="sidebar-tabs">
+    <aside className="pro-sidebar">
+      {/* 60px Primary Icon Rail */}
+      <nav className="sidebar-rail">
         <button
           type="button"
-          className={`tab-btn ${activeTab === 'templates' ? 'active' : ''}`}
+          className={`rail-btn ${activeTab === 'templates' ? 'active' : ''}`}
           onClick={() => setActiveTab('templates')}
-          title="Grid Templates"
+          title="Grid Layouts"
         >
           <LayoutGrid size={18} />
-          <span>Grids</span>
+          <span>Layouts</span>
         </button>
 
         <button
           type="button"
-          className={`tab-btn ${activeTab === 'freeform' ? 'active' : ''}`}
-          onClick={() => {
-            setActiveTab('freeform');
-            if (mode !== 'freeform') setMode('freeform');
-          }}
-          title="Create Your Own Freeform Layout"
+          className={`rail-btn ${activeTab === 'freeform' ? 'active' : ''}`}
+          onClick={() => setActiveTab('freeform')}
+          title="Freeform Scrapbook Layers"
         >
           <Layers size={18} />
           <span>Layers</span>
@@ -111,72 +106,72 @@ export default function Sidebar({
 
         <button
           type="button"
-          className={`tab-btn ${activeTab === 'canvas' ? 'active' : ''}`}
+          className={`rail-btn ${activeTab === 'canvas' ? 'active' : ''}`}
           onClick={() => setActiveTab('canvas')}
-          title="Canvas Background & Spacing"
+          title="Canvas Spacing & Background"
         >
           <Palette size={18} />
-          <span>Style</span>
+          <span>Canvas</span>
         </button>
 
         <button
           type="button"
-          className={`tab-btn ${activeTab === 'filters' ? 'active' : ''}`}
+          className={`rail-btn ${activeTab === 'filters' ? 'active' : ''}`}
           onClick={() => setActiveTab('filters')}
-          title="Aesthetic Photo Filters"
+          title="Film Stocks & Color Grades"
         >
-          <Sparkles size={18} />
-          <span>Filters</span>
+          <Sliders size={18} />
+          <span>Grading</span>
         </button>
 
         <button
           type="button"
-          className={`tab-btn ${activeTab === 'text' ? 'active' : ''}`}
+          className={`rail-btn ${activeTab === 'text' ? 'active' : ''}`}
           onClick={() => setActiveTab('text')}
-          title="Story Text & Typography"
+          title="Editorial Typography"
         >
           <Type size={18} />
-          <span>Text</span>
+          <span>Type</span>
         </button>
 
         <button
           type="button"
-          className={`tab-btn ${activeTab === 'stickers' ? 'active' : ''}`}
+          className={`rail-btn ${activeTab === 'stickers' ? 'active' : ''}`}
           onClick={() => setActiveTab('stickers')}
-          title="Badges, Location, Music, Stickers"
+          title="Badges & Details"
         >
-          <Sticker size={18} />
-          <span>Stickers</span>
+          <Bookmark size={18} />
+          <span>Details</span>
         </button>
 
         <button
           type="button"
-          className={`tab-btn ${activeTab === 'photos' ? 'active' : ''}`}
+          className={`rail-btn ${activeTab === 'photos' ? 'active' : ''}`}
           onClick={() => setActiveTab('photos')}
-          title="Aesthetic Photo Stock & Upload"
+          title="Curated Imagery & Uploads"
         >
           <ImageIcon size={18} />
-          <span>Photos</span>
+          <span>Assets</span>
         </button>
-      </div>
+      </nav>
 
-      {/* Tab Panel Contents */}
-      <div className="sidebar-content">
-        {/* ================= TAB 1: TEMPLATES ================= */}
+      {/* 320px Drawer Panel */}
+      <div className="sidebar-drawer">
+        {/* ================= TAB 1: LAYOUT TEMPLATES ================= */}
         {activeTab === 'templates' && (
-          <div className="panel-section">
-            <div className="panel-header">
-              <h3>Collage Templates</h3>
-              <p className="panel-desc">Choose from 15+ curated Instagram grid layouts</p>
+          <div className="drawer-panel">
+            <div className="drawer-header">
+              <h3>Grid Layouts</h3>
+              <p>Curated compositional frameworks for Instagram</p>
             </div>
 
-            {/* Category Filter Chips */}
-            <div className="category-chips">
+            {/* Category Filter Pills */}
+            <div className="category-pill-row">
               {categories.map((cat) => (
                 <button
                   key={cat}
                   type="button"
-                  className={`chip ${templateCategory === cat ? 'active' : ''}`}
+                  className={`cat-pill ${templateCategory === cat ? 'active' : ''}`}
                   onClick={() => setTemplateCategory(cat)}
                 >
                   {cat}
@@ -184,25 +179,25 @@ export default function Sidebar({
               ))}
             </div>
 
-            {/* Template Thumbnails Grid */}
-            <div className="templates-grid">
+            {/* Layout Cards */}
+            <div className="layouts-grid">
               {filteredTemplates.map((tpl) => {
                 const isSelected = mode === 'grid' && currentTemplate?.id === tpl.id;
                 return (
                   <button
                     key={tpl.id}
                     type="button"
-                    className={`template-card ${isSelected ? 'selected' : ''}`}
+                    className={`layout-card ${isSelected ? 'selected' : ''}`}
                     onClick={() => {
                       if (mode !== 'grid') setMode('grid');
                       onSelectTemplate(tpl);
                     }}
                   >
-                    <div className="template-preview-box">
+                    <div className="layout-card-canvas">
                       {tpl.cells.map((cell, idx) => (
                         <div
                           key={idx}
-                          className="template-cell-preview"
+                          className="layout-cell-preview"
                           style={{
                             left: `${cell.x}%`,
                             top: `${cell.y}%`,
@@ -212,8 +207,10 @@ export default function Sidebar({
                         />
                       ))}
                     </div>
-                    <span className="template-name">{tpl.name}</span>
-                    <span className="template-meta">{tpl.photosCount} slots</span>
+                    <div className="layout-card-info">
+                      <span className="layout-name">{tpl.name}</span>
+                      <span className="layout-slots">{tpl.photosCount} photos</span>
+                    </div>
                   </button>
                 );
               })}
@@ -221,82 +218,83 @@ export default function Sidebar({
           </div>
         )}
 
-        {/* ================= TAB 2: FREEFORM BUILDER ================= */}
+        {/* ================= TAB 2: FREEFORM LAYERS ================= */}
         {activeTab === 'freeform' && (
-          <div className="panel-section">
-            <div className="panel-header">
-              <h3>Create Your Own</h3>
-              <p className="panel-desc">Freeform canvas: drag, resize, rotate & layer photos freely</p>
+          <div className="drawer-panel">
+            <div className="drawer-header">
+              <h3>Freeform Scrapbook</h3>
+              <p>Custom collage: arrange, rotate, and style elements freely</p>
             </div>
 
-            {/* Action Buttons to Add to Freeform Canvas */}
-            <div className="add-layer-buttons">
+            {/* Element Add Buttons */}
+            <div className="add-elements-row">
               <button
                 type="button"
-                className="btn-add-layer polaroid"
+                className="btn-add-element polaroid-btn"
                 onClick={() =>
                   onAddFreeformItem({
                     type: 'polaroid',
                     url: CURATED_PHOTOS[Math.floor(Math.random() * CURATED_PHOTOS.length)].full,
-                    caption: 'golden memories',
-                    x: 25 + Math.random() * 20,
+                    caption: 'polaroid memory',
+                    x: 20 + Math.random() * 20,
                     y: 20 + Math.random() * 20,
-                    w: 45,
-                    h: 55,
-                    rot: (Math.random() - 0.5) * 16,
+                    w: 46,
+                    h: 56,
+                    rot: (Math.random() - 0.5) * 14,
                     zIndex: freeformItems.length + 1
                   })
                 }
               >
-                <Plus size={15} />
-                <span>+ Add Polaroid Card</span>
+                <Plus size={14} />
+                <span>Polaroid Print</span>
               </button>
 
               <button
                 type="button"
-                className="btn-add-layer framed"
+                className="btn-add-element framed-btn"
                 onClick={() =>
                   onAddFreeformItem({
                     type: 'photo',
                     url: CURATED_PHOTOS[Math.floor(Math.random() * CURATED_PHOTOS.length)].full,
-                    x: 20 + Math.random() * 30,
-                    y: 20 + Math.random() * 30,
-                    w: 40,
-                    h: 50,
-                    radius: 12,
+                    x: 25 + Math.random() * 20,
+                    y: 25 + Math.random() * 20,
+                    w: 42,
+                    h: 52,
+                    radius: 8,
                     borderWidth: 2,
                     borderColor: '#ffffff',
-                    rot: (Math.random() - 0.5) * 10,
+                    rot: (Math.random() - 0.5) * 8,
                     zIndex: freeformItems.length + 1
                   })
                 }
               >
-                <Plus size={15} />
-                <span>+ Add Framed Photo</span>
+                <Plus size={14} />
+                <span>Framed Photo</span>
               </button>
             </div>
 
-            {/* Selected Item Controls */}
+            {/* Selected Element Controls */}
             {selectedItem && (
-              <div className="selected-item-box">
-                <div className="section-subtitle">Edit Selected Element</div>
+              <div className="inspector-panel">
+                <div className="inspector-header">Selected Element</div>
+
                 {selectedItem.type === 'polaroid' && (
-                  <div className="form-group">
-                    <label>Polaroid Caption</label>
+                  <div className="field-group">
+                    <label>Caption Text</label>
                     <input
                       type="text"
-                      className="input-text"
+                      className="pro-input"
                       value={selectedItem.caption || ''}
                       onChange={(e) => onUpdateFreeformItem(selectedItem.id, { caption: e.target.value })}
-                      placeholder="Handwritten caption..."
+                      placeholder="Write a caption..."
                     />
                   </div>
                 )}
 
-                <div className="control-slider-group">
-                  <div className="slider-label">
+                <div className="slider-group">
+                  <div className="slider-label-row">
                     <span>Rotation</span>
-                    <span className="slider-val">{Math.round(selectedItem.rot || 0)}°</span>
+                    <span className="slider-numeric">{Math.round(selectedItem.rot || 0)}°</span>
                   </div>
                   <input
                     type="range"
@@ -307,112 +305,118 @@ export default function Sidebar({
                   />
                 </div>
 
-                <div className="control-slider-group">
-                  <div className="slider-label">
-                    <span>Width Scale</span>
-                    <span className="slider-val">{Math.round(selectedItem.w || 40)}%</span>
+                <div className="slider-group">
+                  <div className="slider-label-row">
+                    <span>Scale</span>
+                    <span className="slider-numeric">{Math.round(selectedItem.w || 40)}%</span>
                   </div>
-                  <input
-                    type="range"
-                    min="15"
-                    max="90"
-                    value={selectedItem.w || 40}
-                    onChange={(e) => onUpdateFreeformItem(selectedItem.id, { w: parseFloat(e.target.value) })}
-                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button type="button" className="layer-tool-btn" style={{ padding: '2px 8px' }} onClick={() => onUpdateFreeformItem(selectedItem.id, { w: Math.max(20, (selectedItem.w || 40) - 1) })}>-</button>
+                    <input
+                      type="range"
+                      min="20"
+                      max="90"
+                      value={selectedItem.w || 40}
+                      onChange={(e) => onUpdateFreeformItem(selectedItem.id, { w: parseFloat(e.target.value) })}
+                      style={{ flex: 1 }}
+                    />
+                    <button type="button" className="layer-tool-btn" style={{ padding: '2px 8px' }} onClick={() => onUpdateFreeformItem(selectedItem.id, { w: Math.min(90, (selectedItem.w || 40) + 1) })}>+</button>
+                  </div>
                 </div>
 
                 {selectedItem.type === 'photo' && (
-                  <div className="control-slider-group">
-                    <div className="slider-label">
+                  <div className="slider-group">
+                    <div className="slider-label-row">
                       <span>Border Radius</span>
-                      <span className="slider-val">{selectedItem.radius || 0}px</span>
+                      <span className="slider-numeric">{selectedItem.radius || 0} px</span>
                     </div>
-                    <input
-                      type="range"
-                      min="0"
-                      max="40"
-                      value={selectedItem.radius || 0}
-                      onChange={(e) => onUpdateFreeformItem(selectedItem.id, { radius: parseInt(e.target.value, 10) })}
-                    />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <button type="button" className="layer-tool-btn" style={{ padding: '2px 8px' }} onClick={() => onUpdateFreeformItem(selectedItem.id, { radius: Math.max(0, (selectedItem.radius || 0) - 1) })}>-</button>
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={selectedItem.radius || 0}
+                        onChange={(e) => onUpdateFreeformItem(selectedItem.id, { radius: parseInt(e.target.value, 10) })}
+                        style={{ flex: 1 }}
+                      />
+                      <button type="button" className="layer-tool-btn" style={{ padding: '2px 8px' }} onClick={() => onUpdateFreeformItem(selectedItem.id, { radius: Math.min(100, (selectedItem.radius || 0) + 1) })}>+</button>
+                    </div>
                   </div>
                 )}
               </div>
             )}
 
-            {/* Layer Hierarchy List */}
-            <div className="layers-hierarchy">
-              <div className="section-subtitle">Layers Stack ({freeformItems.length})</div>
+            {/* Layer Stack */}
+            <div className="layer-stack-wrapper">
+              <div className="drawer-subhead">Layers ({freeformItems.length})</div>
               {freeformItems.length === 0 ? (
-                <div className="empty-layers-msg">
-                  No elements on canvas yet. Click "+ Add Polaroid Card" or "+ Add Framed Photo" above!
+                <div className="empty-state-notice">
+                  Canvas is empty. Click "+ Polaroid Print" or "+ Framed Photo" above to start building your custom collage.
                 </div>
               ) : (
-                <div className="layers-list">
+                <div className="layer-cards-list">
                   {freeformItems.map((item, idx) => {
                     const isSelected = selectedItemId === item.id;
                     return (
                       <div
                         key={item.id}
-                        className={`layer-item ${isSelected ? 'active' : ''}`}
+                        className={`layer-row ${isSelected ? 'selected' : ''}`}
                         onClick={() => setSelectedItemId(item.id)}
                       >
-                        <div className="layer-thumb">
-                          {item.url ? (
-                            <img src={item.url} alt="layer" />
-                          ) : (
-                            <span className="layer-type-icon">🖼️</span>
-                          )}
+                        <div className="layer-preview-thumb">
+                          {item.url && <img src={item.url} alt="layer thumbnail" />}
                         </div>
-                        <div className="layer-info">
-                          <span className="layer-title">
-                            {item.type === 'polaroid' ? `Polaroid: "${item.caption || 'photo'}"` : 'Framed Photo'}
+                        <div className="layer-details">
+                          <span className="layer-name">
+                            {item.type === 'polaroid' ? `Polaroid: "${item.caption || 'Print'}"` : 'Framed Photo'}
                           </span>
-                          <span className="layer-sub">Z-Index: {item.zIndex || idx + 1}</span>
+                          <span className="layer-meta">Layer #{idx + 1}</span>
                         </div>
-                        <div className="layer-actions">
+                        <div className="layer-action-tools">
                           <button
                             type="button"
-                            className="layer-btn"
+                            className="layer-tool-btn"
                             onClick={(e) => {
                               e.stopPropagation();
                               onReorderFreeformItem(item.id, 'up');
                             }}
                             title="Bring Forward"
                           >
-                            <ChevronUp size={14} />
+                            <ChevronUp size={13} />
                           </button>
                           <button
                             type="button"
-                            className="layer-btn"
+                            className="layer-tool-btn"
                             onClick={(e) => {
                               e.stopPropagation();
                               onReorderFreeformItem(item.id, 'down');
                             }}
                             title="Send Backward"
                           >
-                            <ChevronDown size={14} />
+                            <ChevronDown size={13} />
                           </button>
                           <button
                             type="button"
-                            className="layer-btn"
+                            className="layer-tool-btn"
                             onClick={(e) => {
                               e.stopPropagation();
                               onDuplicateFreeformItem(item.id);
                             }}
                             title="Duplicate"
                           >
-                            <Copy size={14} />
+                            <Copy size={13} />
                           </button>
                           <button
                             type="button"
-                            className="layer-btn delete"
+                            className="layer-tool-btn delete"
                             onClick={(e) => {
                               e.stopPropagation();
                               onRemoveFreeformItem(item.id);
                             }}
                             title="Delete"
                           >
-                            <Trash2 size={14} />
+                            <Trash2 size={13} />
                           </button>
                         </div>
                       </div>
@@ -424,49 +428,48 @@ export default function Sidebar({
           </div>
         )}
 
-        {/* ================= TAB 3: CANVAS & BACKGROUND ================= */}
+        {/* ================= TAB 3: CANVAS & STYLING ================= */}
         {activeTab === 'canvas' && (
-          <div className="panel-section">
-            <div className="panel-header">
-              <h3>Background & Framing</h3>
-              <p className="panel-desc">Curated Instagram gradients, borders & spacing</p>
+          <div className="drawer-panel">
+            <div className="drawer-header">
+              <h3>Canvas & Background</h3>
+              <p>Configure backdrop tones, margins, and border geometry</p>
             </div>
 
-            {/* Gradients & Background Colors */}
-            <div className="section-subtitle">Background Themes</div>
-            <div className="color-swatches-grid">
+            {/* Background Palette */}
+            <div className="drawer-subhead">Backdrop Palette</div>
+            <div className="backdrop-grid">
               {BACKGROUND_PRESETS.map((preset) => {
                 const isSelected = background === preset.id;
                 return (
                   <button
                     key={preset.id}
                     type="button"
-                    className={`bg-preset-chip ${isSelected ? 'selected' : ''}`}
+                    className={`backdrop-chip ${isSelected ? 'selected' : ''}`}
                     onClick={() => {
                       setBackground(preset.id);
                       setCustomBgColor('');
                     }}
-                    title={preset.name}
                   >
-                    <div
-                      className="swatch-circle"
+                    <span
+                      className="swatch-indicator"
                       style={{
-                        background: preset.css.startsWith('#') || preset.css.startsWith('linear') ? preset.css : '#2a2a35'
+                        background: preset.css.startsWith('#') || preset.css.startsWith('linear') ? preset.css : '#161920'
                       }}
                     />
-                    <span className="swatch-name">{preset.name}</span>
+                    <span className="swatch-label">{preset.name}</span>
                   </button>
                 );
               })}
             </div>
 
-            {/* Custom Color Picker */}
-            <div className="form-group custom-color-picker">
+            {/* Custom Color Input */}
+            <div className="field-group custom-color-row">
               <label>Custom Hex Color</label>
-              <div className="color-input-wrapper">
+              <div className="color-picker-box">
                 <input
                   type="color"
-                  value={customBgColor || '#121417'}
+                  value={customBgColor || '#121418'}
                   onChange={(e) => {
                     setCustomBgColor(e.target.value);
                     setBackground('custom');
@@ -474,9 +477,9 @@ export default function Sidebar({
                 />
                 <input
                   type="text"
-                  className="input-text"
+                  className="pro-input mono"
                   value={customBgColor || ''}
-                  placeholder="#121417"
+                  placeholder="#121418"
                   onChange={(e) => {
                     setCustomBgColor(e.target.value);
                     setBackground('custom');
@@ -485,30 +488,15 @@ export default function Sidebar({
               </div>
             </div>
 
-            {/* Pattern Overlay */}
-            <div className="section-subtitle">Background Texture Pattern</div>
-            <div className="pattern-toggle-group">
-              {['none', 'dots', 'grid'].map((pat) => (
-                <button
-                  key={pat}
-                  type="button"
-                  className={`chip ${bgPattern === pat ? 'active' : ''}`}
-                  onClick={() => setBgPattern(pat)}
-                >
-                  {pat.toUpperCase()}
-                </button>
-              ))}
-            </div>
-
-            {/* Grid Layout Sliders (Gap, Padding, Radius) */}
+            {/* Grid Layout Dimensions */}
             {mode === 'grid' && (
-              <div className="grid-controls-box">
-                <div className="section-subtitle">Grid Layout Dimensions</div>
+              <div className="geometry-controls-section">
+                <div className="drawer-subhead">Layout Geometry</div>
 
-                <div className="control-slider-group">
-                  <div className="slider-label">
+                <div className="slider-group">
+                  <div className="slider-label-row">
                     <span>Cell Spacing (Gap)</span>
-                    <span className="slider-val">{gap}px</span>
+                    <span className="slider-numeric">{gap} px</span>
                   </div>
                   <input
                     type="range"
@@ -519,10 +507,10 @@ export default function Sidebar({
                   />
                 </div>
 
-                <div className="control-slider-group">
-                  <div className="slider-label">
-                    <span>Outer Padding</span>
-                    <span className="slider-val">{padding}px</span>
+                <div className="slider-group">
+                  <div className="slider-label-row">
+                    <span>Outer Margin (Padding)</span>
+                    <span className="slider-numeric">{padding} px</span>
                   </div>
                   <input
                     type="range"
@@ -533,36 +521,41 @@ export default function Sidebar({
                   />
                 </div>
 
-                <div className="control-slider-group">
-                  <div className="slider-label">
-                    <span>Rounded Corners</span>
-                    <span className="slider-val">{radius}px</span>
+                <div className="slider-group">
+                  <div className="slider-label-row">
+                    <span>Corner Radius</span>
+                    <span className="slider-numeric">{radius} px</span>
                   </div>
-                  <input
-                    type="range"
-                    min="0"
-                    max="40"
-                    value={radius}
-                    onChange={(e) => setRadius(parseInt(e.target.value, 10))}
-                  />
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <button type="button" className="layer-tool-btn" style={{ padding: '2px 8px' }} onClick={() => setRadius(Math.max(0, radius - 1))}>-</button>
+                    <input
+                      type="range"
+                      min="0"
+                      max="36"
+                      value={radius}
+                      onChange={(e) => setRadius(parseInt(e.target.value, 10))}
+                      style={{ flex: 1 }}
+                    />
+                    <button type="button" className="layer-tool-btn" style={{ padding: '2px 8px' }} onClick={() => setRadius(Math.min(36, radius + 1))}>+</button>
+                  </div>
                 </div>
 
-                <div className="control-slider-group">
-                  <div className="slider-label">
-                    <span>Border Thickness</span>
-                    <span className="slider-val">{borderWidth}px</span>
+                <div className="slider-group">
+                  <div className="slider-label-row">
+                    <span>Border Width</span>
+                    <span className="slider-numeric">{borderWidth} px</span>
                   </div>
                   <input
                     type="range"
                     min="0"
-                    max="10"
+                    max="8"
                     value={borderWidth}
                     onChange={(e) => setBorderWidth(parseInt(e.target.value, 10))}
                   />
                 </div>
 
                 {borderWidth > 0 && (
-                  <div className="form-group">
+                  <div className="field-group">
                     <label>Border Color</label>
                     <input
                       type="color"
@@ -576,32 +569,32 @@ export default function Sidebar({
           </div>
         )}
 
-        {/* ================= TAB 4: FILTERS & FX ================= */}
+        {/* ================= TAB 4: FILM STOCKS & COLOR GRADING ================= */}
         {activeTab === 'filters' && (
-          <div className="panel-section">
-            <div className="panel-header">
-              <h3>Aesthetic Photo Filters</h3>
-              <p className="panel-desc">Apply iconic Instagram color grades and film aesthetics</p>
+          <div className="drawer-panel">
+            <div className="drawer-header">
+              <h3>Color Grading & Film Stocks</h3>
+              <p>Authentic photographic tonal profiles and color grading</p>
             </div>
 
-            <div className="filters-grid">
+            <div className="filters-catalog-grid">
               {FILTER_PRESETS.map((f) => {
                 const isSelected = filter === f.id;
                 return (
                   <button
                     key={f.id}
                     type="button"
-                    className={`filter-card ${isSelected ? 'selected' : ''}`}
+                    className={`filter-item-card ${isSelected ? 'selected' : ''}`}
                     onClick={() => setFilter(f.id)}
                   >
                     <div
-                      className="filter-sample-preview"
+                      className="filter-mini-thumb"
                       style={{
                         backgroundImage: `url(${CURATED_PHOTOS[0].thumb})`,
                         filter: f.css
                       }}
                     />
-                    <span className="filter-name">{f.name}</span>
+                    <span className="filter-title">{f.name}</span>
                   </button>
                 );
               })}
@@ -609,106 +602,99 @@ export default function Sidebar({
           </div>
         )}
 
-        {/* ================= TAB 5: TEXT & TYPOGRAPHY ================= */}
+        {/* ================= TAB 5: EDITORIAL TYPOGRAPHY ================= */}
         {activeTab === 'text' && (
-          <div className="panel-section">
-            <div className="panel-header">
-              <h3>Story Typography</h3>
-              <p className="panel-desc">Add styled titles, captions & Instagram story pill text</p>
+          <div className="drawer-panel">
+            <div className="drawer-header">
+              <h3>Editorial Typography</h3>
+              <p>Add refined headlines, subheadings, and captions</p>
             </div>
 
-            {/* Quick Text Add Buttons */}
-            <div className="quick-text-buttons">
+            <div className="add-text-presets">
               <button
                 type="button"
-                className="btn-add-text"
+                className="btn-text-preset serif"
                 onClick={() =>
                   onAddText({
-                    text: 'SUMMER MEMORIES',
+                    text: 'POSITANO MEMORIES',
                     font: 'Playfair Display',
-                    size: 26,
+                    size: 24,
                     color: '#ffffff',
                     bgPill: true,
-                    pillColor: 'rgba(0,0,0,0.7)',
+                    pillColor: 'rgba(18, 20, 24, 0.85)',
                     x: 50,
-                    y: 85,
-                    align: 'center',
-                    shadow: true
+                    y: 92,
+                    align: 'center'
                   })
                 }
               >
-                + Editorial Title Pill
+                + Editorial Serif Title
               </button>
 
               <button
                 type="button"
-                className="btn-add-text"
+                className="btn-text-preset mono"
                 onClick={() =>
                   onAddText({
-                    text: 'tokyo after dark • 02:45 am',
+                    text: 'STUDIO ARCHIVE • 02:45 AM',
                     font: 'Space Grotesk',
-                    size: 20,
-                    color: '#00f2fe',
+                    size: 16,
+                    color: '#ffffff',
                     bgPill: false,
                     x: 50,
-                    y: 15,
-                    align: 'center',
-                    shadow: true
+                    y: 10,
+                    align: 'center'
                   })
                 }
               >
-                + Neon Aesthetic Subtitle
+                + Technical Monochrome
               </button>
 
               <button
                 type="button"
-                className="btn-add-text"
+                className="btn-text-preset script"
                 onClick={() =>
                   onAddText({
-                    text: 'good vibes only ✨',
+                    text: 'golden memories ✨',
                     font: 'Caveat',
-                    size: 32,
-                    color: '#ffd166',
+                    size: 28,
+                    color: '#f8fafc',
                     bgPill: false,
                     x: 50,
                     y: 50,
-                    align: 'center',
-                    shadow: true
+                    align: 'center'
                   })
                 }
               >
-                + Handwritten Script
+                + Handwritten Note
               </button>
             </div>
 
-            {/* Existing Text Elements List */}
-            <div className="text-elements-list">
-              <div className="section-subtitle">Text Overlays ({texts.length})</div>
+            <div className="text-items-list">
+              <div className="drawer-subhead">Text Layers ({texts.length})</div>
               {texts.map((item) => (
-                <div key={item.id} className="text-editor-card">
-                  <div className="text-card-top">
+                <div key={item.id} className="text-card-editor">
+                  <div className="text-card-header">
                     <input
                       type="text"
-                      className="input-text font-bold"
+                      className="pro-input bold"
                       value={item.text}
                       onChange={(e) => onUpdateText(item.id, { text: e.target.value })}
-                      placeholder="Enter text..."
                     />
                     <button
                       type="button"
-                      className="layer-btn delete"
+                      className="layer-tool-btn delete"
                       onClick={() => onRemoveText(item.id)}
-                      title="Remove text"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 size={13} />
                     </button>
                   </div>
 
-                  <div className="text-controls-grid">
-                    <div className="form-group">
-                      <label>Font Style</label>
+                  <div className="text-properties-grid">
+                    <div className="field-group">
+                      <label>Typeface</label>
                       <select
-                        className="select-dropdown"
+                        className="pro-select"
                         value={item.font}
                         onChange={(e) => onUpdateText(item.id, { font: e.target.value })}
                       >
@@ -720,7 +706,7 @@ export default function Sidebar({
                       </select>
                     </div>
 
-                    <div className="form-group">
+                    <div className="field-group">
                       <label>Color</label>
                       <input
                         type="color"
@@ -730,103 +716,85 @@ export default function Sidebar({
                     </div>
                   </div>
 
-                  <div className="control-slider-group">
-                    <div className="slider-label">
-                      <span>Font Size</span>
-                      <span className="slider-val">{item.size}px</span>
+                  <div className="slider-group">
+                    <div className="slider-label-row">
+                      <span>Size</span>
+                      <span className="slider-numeric">{item.size} px</span>
                     </div>
                     <input
                       type="range"
                       min="12"
-                      max="64"
+                      max="56"
                       value={item.size}
                       onChange={(e) => onUpdateText(item.id, { size: parseInt(e.target.value, 10) })}
                     />
                   </div>
 
-                  <div className="control-slider-group">
-                    <div className="slider-label">
-                      <span>Vertical Position (Y)</span>
-                      <span className="slider-val">{item.y}%</span>
-                    </div>
+                  <label className="checkbox-row">
                     <input
-                      type="range"
-                      min="5"
-                      max="95"
-                      value={item.y}
-                      onChange={(e) => onUpdateText(item.id, { y: parseInt(e.target.value, 10) })}
+                      type="checkbox"
+                      checked={item.bgPill}
+                      onChange={(e) => onUpdateText(item.id, { bgPill: e.target.checked })}
                     />
-                  </div>
-
-                  <div className="checkbox-toggle">
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={item.bgPill}
-                        onChange={(e) => onUpdateText(item.id, { bgPill: e.target.checked })}
-                      />
-                      <span>Instagram Story Background Pill</span>
-                    </label>
-                  </div>
+                    <span>Frosted Backing Pill</span>
+                  </label>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* ================= TAB 6: STICKERS & BADGES ================= */}
+        {/* ================= TAB 6: BADGES & DETAILS ================= */}
         {activeTab === 'stickers' && (
-          <div className="panel-section">
-            <div className="panel-header">
-              <h3>Stickers & Badges</h3>
-              <p className="panel-desc">Add Instagram badges, music player, location pills & stamps</p>
+          <div className="drawer-panel">
+            <div className="drawer-header">
+              <h3>Badges & Details</h3>
+              <p>Minimalist location tags, audio metadata, and date stamps</p>
             </div>
 
-            <div className="stickers-catalog">
+            <div className="badges-list">
               {STICKER_PRESETS.map((st) => (
                 <button
                   key={st.id}
                   type="button"
-                  className="sticker-catalog-item"
+                  className="badge-item-row"
                   onClick={() =>
                     onAddSticker({
                       ...st,
                       id: 'st-' + Date.now(),
-                      x: 20 + Math.random() * 50,
-                      y: 15 + Math.random() * 60,
-                      rot: (Math.random() - 0.5) * 12
+                      x: 20 + Math.random() * 40,
+                      y: 15 + Math.random() * 50,
+                      rot: (Math.random() - 0.5) * 6
                     })
                   }
                 >
-                  <div className="sticker-preview">
-                    {st.type === 'badge' && <span className="verified-icon">✓</span>}
-                    {st.type === 'music' && <span>🎵 {st.trackName}</span>}
-                    {st.type === 'location' && <span>{st.text}</span>}
-                    {st.type === 'timestamp' && <span className="retro-date">{st.text}</span>}
-                    {st.type === 'rec' && <span className="rec-badge">{st.text}</span>}
-                    {st.type === 'emoji' && <span className="emoji-large">{st.emoji}</span>}
-                    {st.type === 'washi_tape' && <span className="washi-preview" />}
-                    {st.type === 'barcode' && <span className="barcode-preview">||||| ||||</span>}
-                    {st.type === 'film_sprocket' && <span>🎞️ {st.text}</span>}
-                  </div>
-                  <span className="sticker-title">{st.title}</span>
+                  <span className="badge-preview-icon">
+                    {st.type === 'badge' && '✓'}
+                    {st.type === 'music' && '🎵'}
+                    {st.type === 'location' && '📍'}
+                    {st.type === 'timestamp' && '⏱️'}
+                    {st.type === 'rec' && '🔴'}
+                    {st.type === 'washi_tape' && 'Tape'}
+                    {st.type === 'barcode' && '|||||'}
+                    {st.type === 'film_sprocket' && '🎞️'}
+                  </span>
+                  <span className="badge-name">{st.title}</span>
                 </button>
               ))}
             </div>
 
-            {/* Active Stickers on Canvas */}
             {stickers.length > 0 && (
-              <div className="active-stickers-list">
-                <div className="section-subtitle">Active Stickers ({stickers.length})</div>
+              <div className="active-elements-section">
+                <div className="drawer-subhead">Applied Badges ({stickers.length})</div>
                 {stickers.map((st) => (
-                  <div key={st.id} className="active-sticker-row">
-                    <span>{st.title || st.text || st.emoji}</span>
+                  <div key={st.id} className="active-badge-row">
+                    <span>{st.title || st.text}</span>
                     <button
                       type="button"
-                      className="layer-btn delete"
+                      className="layer-tool-btn delete"
                       onClick={() => onRemoveSticker(st.id)}
                     >
-                      <Trash2 size={13} />
+                      <Trash2 size={12} />
                     </button>
                   </div>
                 ))}
@@ -835,16 +803,16 @@ export default function Sidebar({
           </div>
         )}
 
-        {/* ================= TAB 7: PHOTOS & UPLOAD ================= */}
+        {/* ================= TAB 7: ASSETS & UPLOAD ================= */}
         {activeTab === 'photos' && (
-          <div className="panel-section">
-            <div className="panel-header">
-              <h3>Photo Library</h3>
-              <p className="panel-desc">Upload local photos or use high-resolution aesthetic stock</p>
+          <div className="drawer-panel">
+            <div className="drawer-header">
+              <h3>Assets & Media</h3>
+              <p>High-resolution imagery and local media upload</p>
             </div>
 
-            {/* File Upload Zone */}
-            <label className="upload-dropzone">
+            {/* Clean Upload Dropzone */}
+            <label className="pro-upload-dropzone">
               <input
                 type="file"
                 multiple
@@ -852,18 +820,18 @@ export default function Sidebar({
                 onChange={onUploadPhoto}
                 style={{ display: 'none' }}
               />
-              <Upload size={22} className="upload-icon" />
-              <span className="upload-title">Upload Photos from Device</span>
-              <span className="upload-sub">Supports PNG, JPG, WebP, HEIC</span>
+              <Upload size={18} className="dropzone-icon" />
+              <span className="dropzone-primary">Upload Images</span>
+              <span className="dropzone-sub">Click to browse or drop files here</span>
             </label>
 
-            {/* Stock Photo Categories */}
-            <div className="category-chips">
+            {/* Category Pills */}
+            <div className="category-pill-row">
               {photoCategories.map((cat) => (
                 <button
                   key={cat}
                   type="button"
-                  className={`chip ${photoCategory === cat ? 'active' : ''}`}
+                  className={`cat-pill ${photoCategory === cat ? 'active' : ''}`}
                   onClick={() => setPhotoCategory(cat)}
                 >
                   {cat.split(' ')[0]}
@@ -871,18 +839,18 @@ export default function Sidebar({
               ))}
             </div>
 
-            {/* Stock Photos Grid */}
-            <div className="stock-photos-grid">
+            {/* Photo Cards Grid */}
+            <div className="assets-gallery-grid">
               {filteredPhotos.map((photo) => (
                 <div
                   key={photo.id}
-                  className="stock-photo-item"
+                  className="asset-tile"
                   onClick={() => onApplyPhotoToSelected(photo.full)}
-                  title={`Click to use: ${photo.title}`}
+                  title={`Apply: ${photo.title}`}
                 >
                   <img src={photo.thumb} alt={photo.title} loading="lazy" />
-                  <div className="stock-photo-overlay">
-                    <span>{photo.title}</span>
+                  <div className="asset-tile-hover">
+                    <span>Use Photo</span>
                   </div>
                 </div>
               ))}

@@ -1,16 +1,15 @@
 import React, { useState } from 'react';
 import {
-  Sparkles,
   Download,
   RotateCcw,
   RotateCw,
-  Smartphone,
   Eye,
   EyeOff,
   LayoutGrid,
   Layers,
-  Palette,
-  Shuffle
+  Sparkles,
+  Check,
+  ChevronDown
 } from 'lucide-react';
 import { ASPECT_RATIOS, SAMPLE_PROJECTS } from '../types/collage';
 
@@ -26,162 +25,163 @@ export default function Header({
   onExport,
   isMockupActive,
   setIsMockupActive,
-  onLoadPreset,
-  onShuffle
+  onLoadPreset
 }) {
   const [showPresetsMenu, setShowPresetsMenu] = useState(false);
+  const [projectName, setProjectName] = useState('Amalfi Memories');
 
   return (
-    <header className="studio-header">
-      {/* Brand & Title */}
-      <div className="header-brand">
-        <div className="brand-logo-badge">
-          <div className="instagram-gradient-ring">
-            <div className="instagram-inner-dot">
-              <Sparkles size={16} className="brand-icon" />
-            </div>
-          </div>
+    <header className="pro-header">
+      {/* Left: App Logo & Project Title */}
+      <div className="header-left">
+        <div className="brand-mark" title="CollageLab Studio">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <rect width="18" height="18" x="3" y="3" rx="4" />
+            <path d="M3 9h18" />
+            <path d="M9 21V9" />
+          </svg>
         </div>
-        <div className="brand-titles">
-          <div className="brand-main">
-            <span className="brand-text">InstaCollage</span>
-            <span className="badge-studio">PRO STUDIO</span>
+
+        <div className="project-meta">
+          <div className="project-title-row">
+            <input
+              type="text"
+              className="project-name-input"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              placeholder="Untitled Collage"
+            />
+            <span className="save-status-pill">
+              <Check size={11} strokeWidth={3} />
+              <span>Saved</span>
+            </span>
           </div>
-          <span className="brand-sub">Aesthetic Instagram Collage Creator</span>
+          <span className="platform-sub">Instagram Creator Studio</span>
         </div>
       </div>
 
-      {/* Center Controls: Mode & Aspect Ratio */}
+      {/* Center: Canvas Format Selector & Mode Switcher */}
       <div className="header-center">
-        {/* Creator Mode Switcher */}
-        <div className="mode-toggle-group">
-          <button
-            type="button"
-            className={`mode-btn ${mode === 'grid' ? 'active' : ''}`}
-            onClick={() => setMode('grid')}
-            title="Preset Grid Layouts"
-          >
-            <LayoutGrid size={15} />
-            <span>Grid Presets</span>
-          </button>
-          <button
-            type="button"
-            className={`mode-btn ${mode === 'freeform' ? 'active' : ''}`}
-            onClick={() => setMode('freeform')}
-            title="Create Your Own Freeform Collage"
-          >
-            <Layers size={15} />
-            <span>Freeform Canvas</span>
-            <span className="badge-new">Custom</span>
-          </button>
+        {/* Aspect Ratio Segmented Group */}
+        <div className="segmented-control">
+          {ASPECT_RATIOS.map((ar) => {
+            const isActive = aspectRatio === ar.id;
+            return (
+              <button
+                key={ar.id}
+                type="button"
+                className={`segment-btn ${isActive ? 'active' : ''}`}
+                onClick={() => setAspectRatio(ar.id)}
+              >
+                <span className="segment-ratio">{ar.id}</span>
+                <span className="segment-label">{ar.sub.replace('IG ', '')}</span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Aspect Ratio Selector */}
-        <div className="aspect-ratio-selector">
-          {ASPECT_RATIOS.map((ar) => (
-            <button
-              key={ar.id}
-              type="button"
-              className={`aspect-btn ${aspectRatio === ar.id ? 'active' : ''}`}
-              onClick={() => setAspectRatio(ar.id)}
-              title={`${ar.label} (${ar.sub})`}
-            >
-              {ar.id === '9:16' ? <Smartphone size={14} /> : null}
-              <span>{ar.id}</span>
-              <span className="aspect-sub">{ar.sub.split(' ')[1] || ar.sub}</span>
-            </button>
-          ))}
+        {/* Mode Selector */}
+        <div className="mode-segmented">
+          <button
+            type="button"
+            className={`mode-tab-btn ${mode === 'grid' ? 'active' : ''}`}
+            onClick={() => setMode('grid')}
+            title="Grid Layouts"
+          >
+            <LayoutGrid size={14} />
+            <span>Grid Layout</span>
+          </button>
+          <button
+            type="button"
+            className={`mode-tab-btn ${mode === 'freeform' ? 'active' : ''}`}
+            onClick={() => setMode('freeform')}
+            title="Freeform Scrapbook Canvas"
+          >
+            <Layers size={14} />
+            <span>Freeform Canvas</span>
+          </button>
         </div>
       </div>
 
-      {/* Action Buttons: Undo/Redo, Presets, Mockup, Export */}
-      <div className="header-actions">
+      {/* Right: History, Presets, Preview & Export */}
+      <div className="header-right">
         {/* Undo / Redo */}
-        <div className="btn-group-tools">
+        <div className="tool-group">
           <button
             type="button"
-            className="icon-action-btn"
+            className="icon-tool-btn"
             onClick={onUndo}
             disabled={!canUndo}
             title="Undo (Ctrl+Z)"
           >
-            <RotateCcw size={16} />
+            <RotateCcw size={15} />
           </button>
           <button
             type="button"
-            className="icon-action-btn"
+            className="icon-tool-btn"
             onClick={onRedo}
             disabled={!canRedo}
             title="Redo (Ctrl+Y)"
           >
-            <RotateCw size={16} />
+            <RotateCw size={15} />
           </button>
         </div>
 
+        <div className="header-divider" />
+
         {/* Presets Menu */}
-        <div className="presets-dropdown-container">
+        <div className="dropdown-wrapper">
           <button
             type="button"
-            className="action-btn-secondary"
+            className="btn-ghost-header"
             onClick={() => setShowPresetsMenu(!showPresetsMenu)}
-            title="Load Aesthetic Starter Collage"
           >
-            <Palette size={15} />
-            <span>Inspo Styles</span>
+            <Sparkles size={14} className="accent-icon" />
+            <span>Presets</span>
+            <ChevronDown size={13} className="chevron-icon" />
           </button>
 
           {showPresetsMenu && (
-            <div className="presets-dropdown-menu">
-              <div className="dropdown-title">Aesthetic Inspo Presets</div>
+            <div className="pro-dropdown-menu">
+              <div className="dropdown-section-header">Curated Styles</div>
               {SAMPLE_PROJECTS.map((proj) => (
                 <button
                   key={proj.id}
                   type="button"
-                  className="preset-option-item"
+                  className="dropdown-item"
                   onClick={() => {
                     onLoadPreset(proj);
+                    setProjectName(proj.name);
                     setShowPresetsMenu(false);
                   }}
                 >
-                  <span className="preset-name">{proj.name}</span>
-                  <span className="preset-tag">{proj.mode} • {proj.aspectRatio}</span>
+                  <span className="dropdown-item-title">{proj.name}</span>
+                  <span className="dropdown-item-meta">{proj.aspectRatio} • {proj.mode === 'grid' ? 'Grid' : 'Freeform'}</span>
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* Shuffle Photos & Style */}
+        {/* Instagram Post Mockup Toggle */}
         <button
           type="button"
-          className="action-btn-secondary"
-          onClick={onShuffle}
-          title="Shuffle sample photos and background"
-        >
-          <Shuffle size={15} />
-          <span>Surprise Me</span>
-        </button>
-
-        {/* Live Instagram Feed Mockup Toggle */}
-        <button
-          type="button"
-          className={`action-btn-mockup ${isMockupActive ? 'active' : ''}`}
+          className={`btn-preview-toggle ${isMockupActive ? 'active' : ''}`}
           onClick={() => setIsMockupActive(!isMockupActive)}
           title="Preview inside realistic Instagram Feed post"
         >
           {isMockupActive ? <EyeOff size={15} /> : <Eye size={15} />}
-          <span>{isMockupActive ? 'Hide Mockup' : 'IG Mockup'}</span>
+          <span>{isMockupActive ? 'Exit Preview' : 'Preview Post'}</span>
         </button>
 
-        {/* High-Res Export */}
+        {/* Primary Export Button */}
         <button
           type="button"
-          className="btn-export-main"
+          className="btn-export-primary"
           onClick={onExport}
-          title="Export high-resolution 1080p collage"
         >
-          <Download size={16} />
-          <span>Export 1080p</span>
+          <Download size={15} />
+          <span>Export</span>
         </button>
       </div>
     </header>

@@ -6,15 +6,14 @@ import InstagramMockup from './components/InstagramMockup';
 import ExportModal from './components/ExportModal';
 import {
   GRID_TEMPLATES,
-  CURATED_PHOTOS,
-  BACKGROUND_PRESETS
+  CURATED_PHOTOS
 } from './types/collage';
 
 export default function App() {
   // Top-level Application State
   const [mode, setMode] = useState('grid'); // 'grid' | 'freeform'
   const [aspectRatio, setAspectRatio] = useState('4:5');
-  const [currentTemplate, setCurrentTemplate] = useState(GRID_TEMPLATES[4]); // Hero Left + 2 Right
+  const [currentTemplate, setCurrentTemplate] = useState(GRID_TEMPLATES[3]); // Hero Left + 2 Stacked
 
   // Initial photos populated with aesthetic sample pictures
   const [photos, setPhotos] = useState([
@@ -26,27 +25,26 @@ export default function App() {
   const [activeCellIndex, setActiveCellIndex] = useState(null);
 
   // Background & Framing
-  const [background, setBackground] = useState('golden-hour');
+  const [background, setBackground] = useState('warm-sand');
   const [customBgColor, setCustomBgColor] = useState('');
-  const [bgPattern, setBgPattern] = useState('none');
-  const [gap, setGap] = useState(8);
-  const [padding, setPadding] = useState(12);
-  const [radius, setRadius] = useState(16);
+  const [gap, setGap] = useState(10);
+  const [padding, setPadding] = useState(14);
+  const [radius, setRadius] = useState(12);
   const [borderWidth, setBorderWidth] = useState(0);
   const [borderColor, setBorderColor] = useState('#ffffff');
 
-  // Filters
-  const [filter, setFilter] = useState('golden-glow');
+  // Photographic Filter
+  const [filter, setFilter] = useState('portra-400');
 
-  // Freeform "Create Your Own" Items
+  // Freeform "Scrapbook" Items
   const [freeformItems, setFreeformItems] = useState([
     {
       id: 'ff-1',
       type: 'polaroid',
-      url: CURATED_PHOTOS[11].full,
-      caption: 'vintage 35mm memories',
-      x: 15,
-      y: 15,
+      url: CURATED_PHOTOS[8].full,
+      caption: 'analog 35mm memories',
+      x: 14,
+      y: 14,
       w: 48,
       h: 58,
       rot: -5,
@@ -55,10 +53,10 @@ export default function App() {
     {
       id: 'ff-2',
       type: 'polaroid',
-      url: CURATED_PHOTOS[3].full,
+      url: CURATED_PHOTOS[4].full,
       caption: 'golden hour glow ✨',
       x: 44,
-      y: 35,
+      y: 34,
       w: 48,
       h: 58,
       rot: 6,
@@ -71,28 +69,27 @@ export default function App() {
   const [texts, setTexts] = useState([
     {
       id: 'txt-1',
-      text: 'AMALFI DUMP ✨',
+      text: 'AMALFI COAST',
       font: 'Playfair Display',
-      size: 26,
-      color: '#ffffff',
-      bgPill: true,
-      pillColor: 'rgba(0, 0, 0, 0.75)',
+      size: 20,
+      color: '#1a1a1a',
+      bgPill: false,
+      pillColor: 'rgba(18, 20, 24, 0.85)',
       x: 50,
-      y: 92,
-      align: 'center',
-      shadow: true
+      y: 95,
+      align: 'center'
     }
   ]);
 
-  // Stickers & Badges
+  // Badges & Details
   const [stickers, setStickers] = useState([
     {
       id: 'st-init-1',
       type: 'location',
-      text: '📍 Positano, Italy',
-      x: 18,
-      y: 8,
-      rot: -2
+      text: 'Positano, Italy',
+      x: 22,
+      y: 7,
+      rot: 0
     }
   ]);
 
@@ -102,9 +99,9 @@ export default function App() {
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   // Undo / Redo History
-  const [history, setHistory] = useState([]);
-  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [historyState, setHistoryState] = useState({ list: [], index: -1 });
   const isHistoryAction = useRef(false);
+  const [isInteracting, setIsInteracting] = useState(false);
 
   // Snapshot current state for history
   const getCurrentSnapshot = useCallback(() => {
@@ -116,7 +113,6 @@ export default function App() {
       cellAdjustments,
       background,
       customBgColor,
-      bgPattern,
       gap,
       padding,
       radius,
@@ -135,7 +131,6 @@ export default function App() {
     cellAdjustments,
     background,
     customBgColor,
-    bgPattern,
     gap,
     padding,
     radius,
@@ -147,40 +142,45 @@ export default function App() {
     stickers
   ]);
 
-  // Record history on meaningful changes
+  // Record history on changes
   useEffect(() => {
+    if (isInteracting) return;
     if (isHistoryAction.current) {
       isHistoryAction.current = false;
       return;
     }
     const snap = getCurrentSnapshot();
-    setHistory((prev) => {
-      const upToCurrent = prev.slice(0, historyIndex + 1);
-      if (upToCurrent[upToCurrent.length - 1] === snap) return prev;
-      return [...upToCurrent, snap];
+    setHistoryState((prev) => {
+      const upToCurrent = prev.list.slice(0, prev.index + 1);
+      if (upToCurrent.length > 0 && upToCurrent[upToCurrent.length - 1] === snap) {
+        return prev;
+      }
+      return {
+        list: [...upToCurrent, snap],
+        index: prev.index + 1
+      };
     });
-    setHistoryIndex((prev) => prev + 1);
-  }, [getCurrentSnapshot]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [getCurrentSnapshot, isInteracting]);
 
   // Undo Handler
   const handleUndo = () => {
-    if (historyIndex > 0) {
+    if (historyState.index > 0) {
       isHistoryAction.current = true;
-      const targetIndex = historyIndex - 1;
-      const snap = JSON.parse(history[targetIndex]);
+      const targetIndex = historyState.index - 1;
+      const snap = JSON.parse(historyState.list[targetIndex]);
       applySnapshot(snap);
-      setHistoryIndex(targetIndex);
+      setHistoryState(prev => ({ ...prev, index: targetIndex }));
     }
   };
 
   // Redo Handler
   const handleRedo = () => {
-    if (historyIndex < history.length - 1) {
+    if (historyState.index < historyState.list.length - 1) {
       isHistoryAction.current = true;
-      const targetIndex = historyIndex + 1;
-      const snap = JSON.parse(history[targetIndex]);
+      const targetIndex = historyState.index + 1;
+      const snap = JSON.parse(historyState.list[targetIndex]);
       applySnapshot(snap);
-      setHistoryIndex(targetIndex);
+      setHistoryState(prev => ({ ...prev, index: targetIndex }));
     }
   };
 
@@ -194,7 +194,6 @@ export default function App() {
     setCellAdjustments(snap.cellAdjustments || {});
     setBackground(snap.background);
     setCustomBgColor(snap.customBgColor || '');
-    setBgPattern(snap.bgPattern || 'none');
     setGap(snap.gap);
     setPadding(snap.padding);
     setRadius(snap.radius);
@@ -227,7 +226,6 @@ export default function App() {
   // Template Selection
   const handleSelectTemplate = (tpl) => {
     setCurrentTemplate(tpl);
-    // Ensure photos array matches template cells
     if (photos.length < tpl.photosCount) {
       const newPhotos = [...photos];
       while (newPhotos.length < tpl.photosCount) {
@@ -256,7 +254,7 @@ export default function App() {
     });
   };
 
-  // Cell Adjustments (Zoom, Pan, Rotate, Flip)
+  // Cell Adjustments
   const handleUpdateCellAdjustment = (index, newAdjust) => {
     setCellAdjustments((prev) => ({
       ...prev,
@@ -264,7 +262,7 @@ export default function App() {
     }));
   };
 
-  // Freeform Item CRUD
+  // Freeform CRUD
   const handleAddFreeformItem = (item) => {
     const newItem = {
       id: 'ff-' + Date.now(),
@@ -311,7 +309,6 @@ export default function App() {
       updated[idx] = updated[targetIdx];
       updated[targetIdx] = temp;
 
-      // Re-assign zIndexes
       return updated.map((it, i) => ({ ...it, zIndex: i + 1 }));
     });
   };
@@ -336,42 +333,34 @@ export default function App() {
     setStickers((prev) => [...prev, newSticker]);
   };
 
-  const handleUpdateSticker = (id, updates) => {
-    setStickers((prev) =>
-      prev.map((st) => (st.id === id ? { ...st, ...updates } : st))
-    );
-  };
-
   const handleRemoveSticker = (id) => {
     setStickers((prev) => prev.filter((st) => st.id !== id));
   };
 
-  // Apply Photo from Stock Library to currently selected cell or as a new Polaroid
+  // Apply Photo from Stock to Active Cell or as Polaroid
   const handleApplyPhotoToSelected = (photoUrl) => {
     if (mode === 'grid') {
       if (activeCellIndex !== null && activeCellIndex < (currentTemplate?.photosCount || 3)) {
         handleCellPhotoChange(activeCellIndex, photoUrl);
       } else {
-        // Apply to first available or first slot
         handleCellPhotoChange(0, photoUrl);
       }
     } else {
-      // Add as new freeform item
       handleAddFreeformItem({
         type: 'polaroid',
         url: photoUrl,
-        caption: 'aesthetic vibes',
+        caption: 'analog print',
         x: 25 + Math.random() * 20,
         y: 20 + Math.random() * 20,
-        w: 45,
-        h: 55,
-        rot: (Math.random() - 0.5) * 14,
+        w: 46,
+        h: 56,
+        rot: (Math.random() - 0.5) * 12,
         zIndex: freeformItems.length + 1
       });
     }
   };
 
-  // Handle local user file uploads
+  // Local File Upload
   const handleUploadPhoto = (e) => {
     if (e.target.files && e.target.files.length > 0) {
       const files = Array.from(e.target.files);
@@ -387,11 +376,11 @@ export default function App() {
               type: 'polaroid',
               url: dataUrl,
               caption: file.name.replace(/\.[^/.]+$/, '').toLowerCase(),
-              x: 20 + Math.random() * 30,
-              y: 20 + Math.random() * 30,
-              w: 45,
-              h: 55,
-              rot: (Math.random() - 0.5) * 12,
+              x: 20 + Math.random() * 25,
+              y: 20 + Math.random() * 25,
+              w: 46,
+              h: 56,
+              rot: (Math.random() - 0.5) * 10,
               zIndex: freeformItems.length + 1
             });
           }
@@ -410,26 +399,12 @@ export default function App() {
     if (preset.photos) setPhotos(preset.photos);
     if (preset.freeformItems) setFreeformItems(preset.freeformItems);
     setBackground(preset.background);
-    setGap(preset.gap || 8);
-    setPadding(preset.padding || 12);
-    setRadius(preset.radius || 16);
+    setGap(preset.gap || 10);
+    setPadding(preset.padding || 14);
+    setRadius(preset.radius || 12);
     setFilter(preset.filter || 'normal');
     if (preset.texts) setTexts(preset.texts);
     if (preset.stickers) setStickers(preset.stickers);
-  };
-
-  // Shuffle Surprise
-  const handleShuffle = () => {
-    const randomTpl = GRID_TEMPLATES[Math.floor(Math.random() * GRID_TEMPLATES.length)];
-    const randomBg = BACKGROUND_PRESETS[Math.floor(Math.random() * BACKGROUND_PRESETS.length)].id;
-    const shuffledPhotos = [...CURATED_PHOTOS]
-      .sort(() => 0.5 - Math.random())
-      .slice(0, randomTpl.photosCount)
-      .map((p) => p.full);
-
-    setCurrentTemplate(randomTpl);
-    setBackground(randomBg);
-    setPhotos(shuffledPhotos);
   };
 
   // State bundle for export renderer
@@ -441,7 +416,6 @@ export default function App() {
     cellAdjustments,
     background,
     customBgColor,
-    bgPattern,
     gap,
     padding,
     radius,
@@ -454,8 +428,8 @@ export default function App() {
   };
 
   return (
-    <div className="studio-app-root">
-      {/* Top Navigation Bar */}
+    <div className="pro-app-root">
+      {/* Studio Header */}
       <Header
         mode={mode}
         setMode={setMode}
@@ -463,17 +437,16 @@ export default function App() {
         setAspectRatio={setAspectRatio}
         onUndo={handleUndo}
         onRedo={handleRedo}
-        canUndo={historyIndex > 0}
-        canRedo={historyIndex < history.length - 1}
+        canUndo={historyState.index > 0}
+        canRedo={historyState.index < historyState.list.length - 1}
         onExport={() => setIsExportModalOpen(true)}
         isMockupActive={isMockupActive}
         setIsMockupActive={setIsMockupActive}
         onLoadPreset={handleLoadPreset}
-        onShuffle={handleShuffle}
       />
 
-      {/* Main Studio Body: Sidebar + Workspace */}
-      <div className="studio-main-layout">
+      {/* Main Studio Body: Sidebar Rail + Workspace */}
+      <div className="pro-studio-body">
         <Sidebar
           activeTab={activeTab}
           setActiveTab={setActiveTab}
@@ -485,8 +458,6 @@ export default function App() {
           setBackground={setBackground}
           customBgColor={customBgColor}
           setCustomBgColor={setCustomBgColor}
-          bgPattern={bgPattern}
-          setBgPattern={setBgPattern}
           gap={gap}
           setGap={setGap}
           padding={padding}
@@ -531,7 +502,6 @@ export default function App() {
           setActiveCellIndex={setActiveCellIndex}
           background={background}
           customBgColor={customBgColor}
-          bgPattern={bgPattern}
           gap={gap}
           padding={padding}
           radius={radius}
@@ -544,15 +514,13 @@ export default function App() {
           setSelectedItemId={setSelectedItemId}
           onRemoveFreeformItem={handleRemoveFreeformItem}
           texts={texts}
-          onUpdateText={handleUpdateText}
           stickers={stickers}
-          onUpdateSticker={handleUpdateSticker}
           onRemoveSticker={handleRemoveSticker}
-          onUploadPhoto={handleUploadPhoto}
+          setIsInteracting={setIsInteracting}
         />
       </div>
 
-      {/* Instagram Feed Mockup Overlay */}
+      {/* Instagram Post Mockup Simulation */}
       {isMockupActive && (
         <InstagramMockup
           aspectRatio={aspectRatio}
@@ -571,7 +539,6 @@ export default function App() {
             setActiveCellIndex={() => {}}
             background={background}
             customBgColor={customBgColor}
-            bgPattern={bgPattern}
             gap={gap}
             padding={padding}
             radius={radius}
@@ -584,11 +551,8 @@ export default function App() {
             setSelectedItemId={() => {}}
             onRemoveFreeformItem={() => {}}
             texts={texts}
-            onUpdateText={() => {}}
             stickers={stickers}
-            onUpdateSticker={() => {}}
             onRemoveSticker={() => {}}
-            onUploadPhoto={() => {}}
           />
         </InstagramMockup>
       )}

@@ -24,7 +24,6 @@ export default function CanvasWorkspace({
   setActiveCellIndex,
   background,
   customBgColor,
-  bgPattern,
   gap,
   padding,
   radius,
@@ -37,24 +36,22 @@ export default function CanvasWorkspace({
   setSelectedItemId,
   onRemoveFreeformItem,
   texts,
-  onUpdateText,
   stickers,
-  onUpdateSticker,
   onRemoveSticker,
-  onUploadPhoto
+  setIsInteracting
 }) {
   const [zoomLevel, setZoomLevel] = useState(1);
   const containerRef = useRef(null);
   const fileInputRef = useRef(null);
   const [dragOverCellIndex, setDragOverCellIndex] = useState(null);
 
-  // Freeform drag interaction state
+  // Freeform dragging state
   const [draggingItemId, setDraggingItemId] = useState(null);
   const dragStartPos = useRef({ x: 0, y: 0, itemX: 0, itemY: 0 });
 
   // Determine background style
   const bgPreset = BACKGROUND_PRESETS.find((b) => b.id === background);
-  let backgroundStyle = '#121417';
+  let backgroundStyle = '#121418';
   if (customBgColor) {
     backgroundStyle = customBgColor;
   } else if (bgPreset) {
@@ -65,7 +62,7 @@ export default function CanvasWorkspace({
   const activeFilterPreset = FILTER_PRESETS.find((f) => f.id === filter);
   const filterCss = activeFilterPreset ? activeFilterPreset.css : 'none';
 
-  // Handle drag and drop photo directly onto cell
+  // Handle drop file directly on cell
   const handleDropOnCell = (e, index) => {
     e.preventDefault();
     setDragOverCellIndex(null);
@@ -79,9 +76,10 @@ export default function CanvasWorkspace({
     }
   };
 
-  // Freeform item mouse drag handling
+  // Freeform dragging interaction
   const handleFreeformMouseDown = (e, item) => {
     e.stopPropagation();
+    setIsInteracting(true);
     setSelectedItemId(item.id);
     setDraggingItemId(item.id);
     dragStartPos.current = {
@@ -105,6 +103,83 @@ export default function CanvasWorkspace({
     };
 
     const handleMouseUp = () => {
+      setIsInteracting(false);
+      setDraggingItemId(null);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+  };
+
+  const handleResizeMouseDown = (e, item, corner) => {
+    e.stopPropagation();
+    e.preventDefault();
+    setIsInteracting(true);
+    setDraggingItemId(item.id);
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startW = item.w || 40;
+    const startH = item.h || startW;
+    const startItemX = item.x;
+    const startItemY = item.y || 20;
+    
+    const artboard = document.getElementById('collage-artboard');
+    if (!artboard) return;
+    const rect = artboard.getBoundingClientRect();
+
+    const handleMouseMove = (moveEvent) => {
+      // Consider zoom level for accurate resize tracking
+      const deltaX = (moveEvent.clientX - startX) / zoomLevel;
+      const deltaY = (moveEvent.clientY - startY) / zoomLevel;
+      
+      const deltaXPercent = (deltaX / rect.width) * 100;
+      const deltaYPercent = (deltaY / rect.height) * 100;
+      
+      let newW = startW;
+      let newH = startH;
+      let newX = startItemX;
+      let newY = startItemY;
+      
+      if (['ne', 'se', 'e'].includes(corner)) {
+         newW = startW + deltaXPercent;
+      } else if (['nw', 'sw', 'w'].includes(corner)) {
+         newW = startW - deltaXPercent;
+         newX = startItemX + deltaXPercent;
+      }
+
+      if (['sw', 'se', 's'].includes(corner)) {
+         newH = startH + deltaYPercent;
+      } else if (['nw', 'ne', 'n'].includes(corner)) {
+         newH = startH - deltaYPercent;
+         newY = startItemY + deltaYPercent;
+      }
+      
+      if (newW < 10) {
+         if (['nw', 'sw', 'w'].includes(corner)) newX = startItemX + (startW - 10);
+         newW = 10;
+      }
+      if (newW > 150) {
+         if (['nw', 'sw', 'w'].includes(corner)) newX = startItemX - (150 - startW);
+         newW = 150;
+      }
+
+      if (newH < 10) {
+         if (['nw', 'ne', 'n'].includes(corner)) newY = startItemY + (startH - 10);
+         newH = 10;
+      }
+      if (newH > 150) {
+         if (['nw', 'ne', 'n'].includes(corner)) newY = startItemY - (150 - startH);
+         newH = 150;
+      }
+
+      onUpdateFreeformItem(item.id, { w: newW, h: newH, x: newX, y: newY });
+    };
+
+    const handleMouseUp = () => {
+      setIsInteracting(false);
       setDraggingItemId(null);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
@@ -115,8 +190,8 @@ export default function CanvasWorkspace({
   };
 
   return (
-    <main className="studio-canvas-workspace" ref={containerRef}>
-      {/* Hidden file input for cell swap */}
+    <main className="pro-workspace" ref={containerRef}>
+      {/* Hidden file input for quick image change */}
       <input
         type="file"
         ref={fileInputRef}
@@ -133,24 +208,26 @@ export default function CanvasWorkspace({
         }}
       />
 
-      {/* Center Artboard Area */}
-      <div className="artboard-viewport" onClick={() => { setActiveCellIndex(null); setSelectedItemId(null); }}>
+      {/* Center Viewport */}
+      <div
+        className="artboard-stage"
+        onClick={() => {
+          setActiveCellIndex(null);
+          setSelectedItemId(null);
+        }}
+      >
         <div
           id="collage-artboard"
-          className={`collage-artboard aspect-${aspectRatio.replace(':', '-')}`}
+          className={`artboard-frame aspect-${aspectRatio.replace(':', '-')}`}
           style={{
             transform: `scale(${zoomLevel})`,
             background: backgroundStyle,
             padding: `${padding}px`
           }}
         >
-          {/* Subtle Background Texture Pattern */}
-          {bgPattern === 'dots' && <div className="artboard-texture-dots" />}
-          {bgPattern === 'grid' && <div className="artboard-texture-grid" />}
-
           {/* ================= MODE: GRID ================= */}
           {mode === 'grid' && (
-            <div className="grid-layout-container">
+            <div className="grid-cells-container">
               {currentTemplate?.cells.map((cell, idx) => {
                 const photoUrl = photos[idx];
                 const adjust = cellAdjustments[idx] || {};
@@ -160,7 +237,7 @@ export default function CanvasWorkspace({
                 return (
                   <div
                     key={idx}
-                    className={`grid-cell-wrapper ${isSelected ? 'selected' : ''} ${isDragOver ? 'drag-over' : ''}`}
+                    className={`grid-cell ${isSelected ? 'selected' : ''} ${isDragOver ? 'drag-over' : ''}`}
                     style={{
                       left: `calc(${cell.x}% + ${gap / 2}px)`,
                       top: `calc(${cell.y}% + ${gap / 2}px)`,
@@ -181,11 +258,12 @@ export default function CanvasWorkspace({
                     onDrop={(e) => handleDropOnCell(e, idx)}
                   >
                     {photoUrl ? (
-                      <div className="cell-image-holder">
+                      <div className="cell-photo-wrapper">
                         <img
                           src={photoUrl}
                           alt={`Slot ${idx + 1}`}
-                          className="cell-image"
+                          className="cell-photo-element"
+                          draggable={false}
                           style={{
                             filter: filterCss,
                             transform: `scale(${adjust.zoom || 1}) translate(${adjust.panX || 0}%, ${adjust.panY || 0}%) rotate(${adjust.rotate || 0}deg) ${adjust.flipH ? 'scaleX(-1)' : ''}`,
@@ -195,25 +273,24 @@ export default function CanvasWorkspace({
                       </div>
                     ) : (
                       <div
-                        className="cell-empty-placeholder"
+                        className="cell-placeholder"
                         onClick={(e) => {
                           e.stopPropagation();
                           setActiveCellIndex(idx);
                           fileInputRef.current?.click();
                         }}
                       >
-                        <Upload size={20} className="placeholder-icon" />
-                        <span className="placeholder-text">Click to Add Photo</span>
-                        <span className="placeholder-sub">or drop image here</span>
+                        <Upload size={18} className="placeholder-icon" />
+                        <span className="placeholder-label">Add Photo</span>
                       </div>
                     )}
 
-                    {/* Active Cell Floating Toolbar */}
+                    {/* Floating Contextual Toolbar for Active Cell */}
                     {isSelected && photoUrl && (
-                      <div className="cell-floating-toolbar" onClick={(e) => e.stopPropagation()}>
+                      <div className="floating-cell-toolbar" onClick={(e) => e.stopPropagation()}>
                         <button
                           type="button"
-                          className="cell-tool-btn"
+                          className="cell-tool-action"
                           title="Replace Photo"
                           onClick={() => fileInputRef.current?.click()}
                         >
@@ -221,7 +298,7 @@ export default function CanvasWorkspace({
                         </button>
                         <button
                           type="button"
-                          className="cell-tool-btn"
+                          className="cell-tool-action"
                           title="Rotate 90°"
                           onClick={() =>
                             onUpdateCellAdjustment(idx, {
@@ -233,7 +310,7 @@ export default function CanvasWorkspace({
                         </button>
                         <button
                           type="button"
-                          className="cell-tool-btn"
+                          className="cell-tool-action"
                           title="Flip Horizontal"
                           onClick={() =>
                             onUpdateCellAdjustment(idx, {
@@ -245,7 +322,7 @@ export default function CanvasWorkspace({
                         </button>
                         <button
                           type="button"
-                          className="cell-tool-btn delete"
+                          className="cell-tool-action danger"
                           title="Remove Photo"
                           onClick={() => onClearCellPhoto(idx)}
                         >
@@ -259,77 +336,84 @@ export default function CanvasWorkspace({
             </div>
           )}
 
-          {/* ================= MODE: FREEFORM / CREATE YOUR OWN ================= */}
-          {mode === 'freeform' && (
-            <div className="freeform-layer-container">
-              {freeformItems.map((item) => {
+          {/* ================= FREEFORM SCRAPBOOK LAYERS ================= */}
+          <div className="freeform-canvas-container">
+            {freeformItems.map((item) => {
                 const isSelected = selectedItemId === item.id;
                 const isDragging = draggingItemId === item.id;
 
                 return (
                   <div
                     key={item.id}
-                    className={`freeform-item ${item.type} ${isSelected ? 'selected' : ''} ${isDragging ? 'dragging' : ''}`}
+                    className={`freeform-layer ${item.type} ${isSelected ? 'selected' : ''} ${isDragging ? 'dragging' : ''}`}
                     style={{
                       left: `${item.x}%`,
                       top: `${item.y}%`,
                       width: `${item.w}%`,
+                      height: `${item.h || item.w}%`,
                       transform: `rotate(${item.rot || 0}deg)`,
                       zIndex: item.zIndex || 1
                     }}
                     onMouseDown={(e) => handleFreeformMouseDown(e, item)}
+                    onClick={(e) => e.stopPropagation()}
                   >
                     {item.type === 'polaroid' && (
-                      <div className="polaroid-card">
-                        <div className="polaroid-photo-frame">
+                      <div className="pro-polaroid-card">
+                        <div className="polaroid-image-frame">
                           <img
                             src={item.url}
                             alt="polaroid"
+                            draggable={false}
                             style={{ filter: filterCss }}
                           />
                         </div>
                         <input
                           type="text"
-                          className="polaroid-caption-input"
+                          className="polaroid-caption-edit"
                           value={item.caption || ''}
                           onClick={(e) => e.stopPropagation()}
                           onChange={(e) =>
                             onUpdateFreeformItem(item.id, { caption: e.target.value })
                           }
-                          placeholder="Write caption..."
+                          placeholder="Add caption..."
                         />
                       </div>
                     )}
 
                     {item.type === 'photo' && (
                       <div
-                        className="framed-photo-box"
+                        className="pro-framed-photo"
                         style={{
-                          borderRadius: `${item.radius || 12}px`,
+                          borderRadius: `${item.radius || 8}px`,
                           border: `${item.borderWidth || 2}px solid ${item.borderColor || '#ffffff'}`
                         }}
                       >
                         <img
                           src={item.url}
                           alt="framed"
+                          draggable={false}
                           style={{
                             filter: filterCss,
-                            borderRadius: `${Math.max(0, (item.radius || 12) - (item.borderWidth || 2))}px`
+                            borderRadius: `${Math.max(0, (item.radius || 8) - (item.borderWidth || 2))}px`
                           }}
                         />
                       </div>
                     )}
 
-                    {/* Selection Handles */}
+                    {/* Figma/Canva Style Selection Bounding Box */}
                     {isSelected && (
-                      <div className="item-selection-box" onClick={(e) => e.stopPropagation()}>
-                        <div className="selection-handle top-left" />
-                        <div className="selection-handle top-right" />
-                        <div className="selection-handle bottom-left" />
-                        <div className="selection-handle bottom-right" />
+                      <div className="pro-selection-bounding" onClick={(e) => e.stopPropagation()}>
+                        <div className="selection-handle-node nw" onMouseDown={(e) => handleResizeMouseDown(e, item, 'nw')} />
+                        <div className="selection-handle-node ne" onMouseDown={(e) => handleResizeMouseDown(e, item, 'ne')} />
+                        <div className="selection-handle-node sw" onMouseDown={(e) => handleResizeMouseDown(e, item, 'sw')} />
+                        <div className="selection-handle-node se" onMouseDown={(e) => handleResizeMouseDown(e, item, 'se')} />
+                        <div className="selection-handle-node n" onMouseDown={(e) => handleResizeMouseDown(e, item, 'n')} />
+                        <div className="selection-handle-node s" onMouseDown={(e) => handleResizeMouseDown(e, item, 's')} />
+                        <div className="selection-handle-node e" onMouseDown={(e) => handleResizeMouseDown(e, item, 'e')} />
+                        <div className="selection-handle-node w" onMouseDown={(e) => handleResizeMouseDown(e, item, 'w')} />
                         <button
                           type="button"
-                          className="selection-delete-btn"
+                          className="selection-delete-icon"
                           onClick={() => onRemoveFreeformItem(item.id)}
                           title="Delete Element"
                         >
@@ -341,13 +425,12 @@ export default function CanvasWorkspace({
                 );
               })}
             </div>
-          )}
 
           {/* ================= TEXT OVERLAYS ================= */}
           {texts.map((t) => (
             <div
               key={t.id}
-              className={`artboard-text-layer ${t.bgPill ? 'has-pill' : ''}`}
+              className={`pro-text-overlay ${t.bgPill ? 'with-pill' : ''}`}
               style={{
                 left: `${t.x}%`,
                 top: `${t.y}%`,
@@ -355,7 +438,7 @@ export default function CanvasWorkspace({
                 fontFamily: `'${t.font}', sans-serif`,
                 fontSize: `${t.size}px`,
                 color: t.color,
-                backgroundColor: t.bgPill ? (t.pillColor || 'rgba(0,0,0,0.7)') : 'transparent',
+                backgroundColor: t.bgPill ? (t.pillColor || 'rgba(18, 20, 24, 0.85)') : 'transparent',
                 textAlign: t.align || 'center'
               }}
             >
@@ -363,11 +446,11 @@ export default function CanvasWorkspace({
             </div>
           ))}
 
-          {/* ================= STICKER OVERLAYS ================= */}
+          {/* ================= BADGES & STICKER OVERLAYS ================= */}
           {stickers.map((st) => (
             <div
               key={st.id}
-              className="artboard-sticker-layer"
+              className="pro-badge-overlay"
               style={{
                 left: `${st.x}%`,
                 top: `${st.y}%`,
@@ -376,44 +459,42 @@ export default function CanvasWorkspace({
               onClick={(e) => e.stopPropagation()}
             >
               {st.type === 'location' && (
-                <div className="sticker-location-pill">{st.text}</div>
+                <div className="pro-location-tag">
+                  <span className="dot-pin" />
+                  <span>{st.text}</span>
+                </div>
               )}
               {st.type === 'timestamp' && (
-                <div className="sticker-timestamp">{st.text}</div>
+                <div className="pro-date-tag">{st.text}</div>
               )}
               {st.type === 'rec' && (
-                <div className="sticker-rec-tag">{st.text}</div>
+                <div className="pro-rec-tag">
+                  <span className="rec-dot" />
+                  <span>{st.text}</span>
+                </div>
               )}
               {st.type === 'badge' && (
-                <div className="sticker-verified-badge">
-                  <Check size={14} color="#ffffff" strokeWidth={3} />
+                <div className="pro-verified-circle">
+                  <Check size={13} color="#ffffff" strokeWidth={3} />
                 </div>
               )}
               {st.type === 'music' && (
-                <div className="sticker-music-card">
-                  <span className="music-note">🎵</span>
-                  <div className="music-info">
-                    <span className="track">{st.trackName}</span>
-                    <span className="artist">{st.artist}</span>
-                  </div>
-                  <div className="music-bars">
-                    <span className="bar b1" />
-                    <span className="bar b2" />
-                    <span className="bar b3" />
+                <div className="pro-music-pill">
+                  <span className="music-icon">🎵</span>
+                  <div className="music-details">
+                    <span className="music-track">{st.trackName}</span>
+                    <span className="music-artist">{st.artist}</span>
                   </div>
                 </div>
               )}
-              {st.type === 'emoji' && (
-                <div className="sticker-emoji-display">{st.emoji}</div>
-              )}
               {st.type === 'washi_tape' && (
-                <div className="sticker-washi-tape" style={{ background: st.color }} />
+                <div className="pro-washi-tape" style={{ background: st.color }} />
               )}
               <button
                 type="button"
-                className="sticker-remove-btn"
+                className="badge-remove-btn"
                 onClick={() => onRemoveSticker(st.id)}
-                title="Remove sticker"
+                title="Remove"
               >
                 ×
               </button>
@@ -422,39 +503,40 @@ export default function CanvasWorkspace({
         </div>
       </div>
 
-      {/* Bottom Zoom & View Toolbar */}
-      <div className="artboard-bottom-bar">
-        <div className="artboard-info-tag">
-          <span>{aspectRatio}</span>
-          <span className="dot">•</span>
-          <span>{mode === 'grid' ? currentTemplate?.name : 'Freeform Canvas'}</span>
+      {/* Floating Bottom View Toolbar */}
+      <div className="floating-canvas-toolbar">
+        <div className="toolbar-info">
+          <span className="canvas-aspect-badge">{aspectRatio}</span>
+          <span className="canvas-mode-badge">{mode === 'grid' ? currentTemplate?.name : 'Scrapbook'}</span>
         </div>
 
-        <div className="zoom-controls-wrapper">
+        <div className="toolbar-divider" />
+
+        <div className="zoom-controls">
           <button
             type="button"
-            className="zoom-btn"
+            className="zoom-tool-btn"
             onClick={() => setZoomLevel(Math.max(0.4, zoomLevel - 0.1))}
             title="Zoom Out"
           >
-            <ZoomOut size={15} />
+            <ZoomOut size={14} />
           </button>
-          <span className="zoom-label">{Math.round(zoomLevel * 100)}%</span>
+          <span className="zoom-value">{Math.round(zoomLevel * 100)}%</span>
           <button
             type="button"
-            className="zoom-btn"
+            className="zoom-tool-btn"
             onClick={() => setZoomLevel(Math.min(1.6, zoomLevel + 0.1))}
             title="Zoom In"
           >
-            <ZoomIn size={15} />
+            <ZoomIn size={14} />
           </button>
           <button
             type="button"
-            className="zoom-btn reset"
+            className="zoom-tool-btn reset"
             onClick={() => setZoomLevel(1)}
-            title="Fit / Reset Zoom"
+            title="Fit to Screen"
           >
-            <Maximize2 size={15} />
+            <Maximize2 size={13} />
           </button>
         </div>
       </div>
