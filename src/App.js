@@ -487,6 +487,9 @@ export default function App() {
           onRemoveSticker={handleRemoveSticker}
           onApplyPhotoToSelected={handleApplyPhotoToSelected}
           onUploadPhoto={handleUploadPhoto}
+          onExport={() => setIsExportModalOpen(true)}
+          isMockupActive={isMockupActive}
+          setIsMockupActive={setIsMockupActive}
         />
 
         <CanvasWorkspace

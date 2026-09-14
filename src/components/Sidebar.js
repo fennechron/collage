@@ -12,7 +12,11 @@ import {
   Trash2,
   Copy,
   ChevronUp,
-  ChevronDown
+  ChevronDown,
+  Download,
+  Eye,
+  EyeOff,
+  X
 } from 'lucide-react';
 import {
   GRID_TEMPLATES,
@@ -62,7 +66,10 @@ export default function Sidebar({
   onAddSticker,
   onRemoveSticker,
   onApplyPhotoToSelected,
-  onUploadPhoto
+  onUploadPhoto,
+  onExport,
+  isMockupActive,
+  setIsMockupActive
 }) {
   const [templateCategory, setTemplateCategory] = useState('All');
   const [photoCategory, setPhotoCategory] = useState('All');
@@ -80,14 +87,22 @@ export default function Sidebar({
 
   const selectedItem = freeformItems.find((item) => item.id === selectedItemId);
 
+  const handleTabToggle = (tabName) => {
+    setActiveTab(activeTab === tabName ? null : tabName);
+  };
+
   return (
-    <aside className="pro-sidebar">
+    <>
+      {/* Mobile Drawer Backdrop */}
+      <div className={`drawer-backdrop ${activeTab ? 'visible' : ''}`} onClick={() => setActiveTab(null)} />
+      
+      <aside className={`pro-sidebar ${!activeTab ? 'drawer-closed' : ''}`}>
       {/* 60px Primary Icon Rail */}
       <nav className="sidebar-rail">
         <button
           type="button"
           className={`rail-btn ${activeTab === 'templates' ? 'active' : ''}`}
-          onClick={() => setActiveTab('templates')}
+          onClick={() => handleTabToggle('templates')}
           title="Grid Layouts"
         >
           <LayoutGrid size={18} />
@@ -97,7 +112,7 @@ export default function Sidebar({
         <button
           type="button"
           className={`rail-btn ${activeTab === 'freeform' ? 'active' : ''}`}
-          onClick={() => setActiveTab('freeform')}
+          onClick={() => handleTabToggle('freeform')}
           title="Freeform Scrapbook Layers"
         >
           <Layers size={18} />
@@ -107,7 +122,7 @@ export default function Sidebar({
         <button
           type="button"
           className={`rail-btn ${activeTab === 'canvas' ? 'active' : ''}`}
-          onClick={() => setActiveTab('canvas')}
+          onClick={() => handleTabToggle('canvas')}
           title="Canvas Spacing & Background"
         >
           <Palette size={18} />
@@ -117,7 +132,7 @@ export default function Sidebar({
         <button
           type="button"
           className={`rail-btn ${activeTab === 'filters' ? 'active' : ''}`}
-          onClick={() => setActiveTab('filters')}
+          onClick={() => handleTabToggle('filters')}
           title="Film Stocks & Color Grades"
         >
           <Sliders size={18} />
@@ -127,7 +142,7 @@ export default function Sidebar({
         <button
           type="button"
           className={`rail-btn ${activeTab === 'text' ? 'active' : ''}`}
-          onClick={() => setActiveTab('text')}
+          onClick={() => handleTabToggle('text')}
           title="Editorial Typography"
         >
           <Type size={18} />
@@ -137,7 +152,7 @@ export default function Sidebar({
         <button
           type="button"
           className={`rail-btn ${activeTab === 'stickers' ? 'active' : ''}`}
-          onClick={() => setActiveTab('stickers')}
+          onClick={() => handleTabToggle('stickers')}
           title="Badges & Details"
         >
           <Bookmark size={18} />
@@ -147,16 +162,45 @@ export default function Sidebar({
         <button
           type="button"
           className={`rail-btn ${activeTab === 'photos' ? 'active' : ''}`}
-          onClick={() => setActiveTab('photos')}
+          onClick={() => handleTabToggle('photos')}
           title="Curated Imagery & Uploads"
         >
           <ImageIcon size={18} />
           <span>Assets</span>
         </button>
+
+        {/* Mobile Actions Section */}
+        <div className="rail-actions-mobile">
+          <div className="rail-divider"></div>
+          <button
+            type="button"
+            className={`rail-btn action-btn ${isMockupActive ? 'active' : ''}`}
+            onClick={() => setIsMockupActive(!isMockupActive)}
+            title="Preview Post"
+          >
+            {isMockupActive ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+          <button
+            type="button"
+            className="rail-btn action-btn primary"
+            onClick={onExport}
+            title="Export"
+          >
+            <Download size={18} />
+          </button>
+        </div>
       </nav>
 
       {/* 320px Drawer Panel */}
       <div className="sidebar-drawer">
+        <button 
+          className="drawer-close-btn" 
+          onClick={() => setActiveTab(null)}
+          title="Close Drawer"
+        >
+          <X size={20} />
+        </button>
+
         {/* ================= TAB 1: LAYOUT TEMPLATES ================= */}
         {activeTab === 'templates' && (
           <div className="drawer-panel">
@@ -859,5 +903,6 @@ export default function Sidebar({
         )}
       </div>
     </aside>
+    </>
   );
 }
